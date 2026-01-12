@@ -2,6 +2,10 @@ import discord
 from discord.ext import tasks
 import feedparser
 import os
+from dotenv import load_dotenv
+
+# Load the .env file
+load_dotenv()
 
 # -------- CONFIGURATION --------
 # Replace the numbers/names below with your own info
@@ -9,12 +13,11 @@ CHANNEL_ID = 1460294826212720791
 TIKTOK_CREATORS = ["mrbreakthebar"]  
 CHECK_INTERVAL = 5                         # Minutes between checks
 
-# PASTE YOUR DISCORD BOT TOKEN BETWEEN THE QUOTES BELOW
-TOKEN = "YOUR_DISCORD_BOT_TOKEN_HERE"
+# This line now looks for "DISCORD_TOKEN" inside your .env file
+TOKEN = os.getenv("DISCORD_TOKEN")
 # --------------------------------
 
 intents = discord.Intents.default()
-# If your bot needs to read messages, you might need: intents.message_content = True
 client = discord.Client(intents=intents)
 
 # Keep track of last post for each creator
@@ -34,7 +37,6 @@ async def check_tiktok():
         return
 
     for creator in TIKTOK_CREATORS:
-        # Note: TikTok RSS feeds via public URLs can be inconsistent
         rss_url = f'https://www.tiktok.com/@{creator}/feed'
         feed = feedparser.parse(rss_url)
         
@@ -43,7 +45,6 @@ async def check_tiktok():
             
         latest = feed.entries[0]
 
-        # If this post is new, send notification
         if last_posts.get(creator) != latest.id:
             last_posts[creator] = latest.id
             
@@ -54,11 +55,14 @@ async def check_tiktok():
                 color=0x00ff00
             )
             
-            # Add thumbnail if available
             if "media_thumbnail" in latest:
                 embed.set_thumbnail(url=latest.media_thumbnail[0]['url'])
             
             await channel.send(embed=embed)
             print(f"Sent notification for {creator}")
 
-client.run(TOKEN)
+# Check if token exists before running
+if TOKEN:
+    client.run(TOKEN)
+else:
+    print("ERROR: No token found! Make sure your .env file has DISCORD_TOKEN=your_token")
