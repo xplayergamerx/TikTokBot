@@ -1,68 +1,28 @@
-\# TikTok Notifier Discord Bot
+# 📱 TikTok Notifier Discord Bot
 
+A lightweight Discord bot that monitors TikTok RSS feeds and sends a notification to a specific Discord channel whenever a creator posts a new video.
 
+## 🚀 Features
+- **RSS-Based Tracking:** No complex TikTok API keys required.
+- **Embedded Alerts:** Beautiful Discord embeds including video titles and thumbnails.
+- **Multi-Creator Support:** Track as many creators as you like.
+- **Auto-Update:** Checks for new content every 5 minutes (customizable).
 
-This bot sends a Discord notification whenever a specified TikTok creator posts a new video.
+---
 
+## 🛠️ Setup Instructions
 
+### 1. Prerequisites
+- A Discord Bot Token from the [Discord Developer Portal](https://discord.com/developers/applications).
+- A host (like [Bot-Hosting.net](https://bot-hosting.net)).
 
-\## Features
+### 2. File Configuration
+In your hosting panel's **Files** tab, ensure you have these three files:
 
+#### `bot.py`
+Paste your script into this file. Update the `CHANNEL_ID` and `TIKTOK_CREATORS` list at the top of the script.
 
-
-\- Tracks multiple TikTok creators
-
-\- Sends notifications in a Discord channel
-
-\- Includes video title and thumbnail in an embed
-
-\- Checks for new posts every 5 minutes
-
-
-
-\## Setup
-
-
-
-1\. \*\*Add your bot token as an environment variable on Railway:\*\*
-
-
-
-&nbsp;  - Key: `DISCORD\_TOKEN`
-
-&nbsp;  - Value: Your Discord bot token
-
-
-
-2\. \*\*Configure `bot.py`:\*\*
-
-&nbsp;  - `CHANNEL\_ID`: The Discord channel where notifications will appear
-
-&nbsp;  - `TIKTOK\_CREATORS`: A list of TikTok usernames to track (without `@`)
-
-
-
-3\. \*\*Dependencies:\*\*
-
-&nbsp;  - Listed in `requirements.txt` (`discord.py`, `feedparser`)
-
-
-
-4\. \*\*Deploy on Railway:\*\*
-
-&nbsp;  - Connect your GitHub repo
-
-&nbsp;  - Railway will automatically install dependencies and run `bot.py`
-
-
-
-\## Notes
-
-
-
-\- Make sure the bot has \*\*Send Messages\*\* and \*\*Embed Links\*\* permissions in the target Discord channel.
-
-\- TikTok usernames must be \*\*exact and case-sensitive\*\*.
-
-\- The free Railway plan may sleep after periods of inactivity, but the bot will restart when needed.
-
+#### `.env` (Create this file if it doesn't exist)
+Add your Discord token here so the bot can log in:
+```env
+DISCORD_TOKEN=your_token_here_without_quotes
