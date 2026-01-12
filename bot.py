@@ -4,20 +4,19 @@ import feedparser
 import os
 from dotenv import load_dotenv
 
-# Load the .env file
+# Load variables from .env file
 load_dotenv()
 
 # -------- CONFIGURATION --------
-# Replace the numbers/names below with your own info
 CHANNEL_ID = 1460294826212720791           
 TIKTOK_CREATORS = ["mrbreakthebar"]  
-CHECK_INTERVAL = 5                         # Minutes between checks
-
-# This line now looks for "DISCORD_TOKEN" inside your .env file
+CHECK_INTERVAL = 5                         
 TOKEN = os.getenv("DISCORD_TOKEN")
 # --------------------------------
 
+# We need message_content to hear !test and default for everything else
 intents = discord.Intents.default()
+intents.message_content = True 
 client = discord.Client(intents=intents)
 
 # Keep track of last post for each creator
@@ -25,15 +24,26 @@ last_posts = {creator: None for creator in TIKTOK_CREATORS}
 
 @client.event
 async def on_ready():
-    print(f'Logged in as {client.user}')
+    print(f'✅ Logged in as {client.user}')
+    print(f'📺 Tracking creators: {", ".join(TIKTOK_CREATORS)}')
     if not check_tiktok.is_running():
         check_tiktok.start()
+
+# --- TEST COMMAND ---
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.content == "!test":
+        await message.channel.send("✅ **Bot is Online!** I am successfully reading the .env file and have permission to post here.")
+        print(f"Test command handled in #{message.channel}")
 
 @tasks.loop(minutes=CHECK_INTERVAL)
 async def check_tiktok():
     channel = client.get_channel(CHANNEL_ID)
     if channel is None:
-        print(f"Error: Cannot find channel {CHANNEL_ID}. Check permissions!")
+        print(f"❌ Error: Cannot find channel {CHANNEL_ID}. Check the ID and Bot Permissions!")
         return
 
     for creator in TIKTOK_CREATORS:
@@ -45,7 +55,9 @@ async def check_tiktok():
             
         latest = feed.entries[0]
 
+        # If this post is new, send notification
         if last_posts.get(creator) != latest.id:
+            # Update the tracker
             last_posts[creator] = latest.id
             
             embed = discord.Embed(
@@ -58,11 +70,11 @@ async def check_tiktok():
             if "media_thumbnail" in latest:
                 embed.set_thumbnail(url=latest.media_thumbnail[0]['url'])
             
-            await channel.send(embed=embed)
-            print(f"Sent notification for {creator}")
+            # This line sends the @everyone alert followed by the embed
+            await channel.send(content="@everyone 📢 New TikTok post!", embed=embed)
+            print(f"🚀 Sent notification for {creator}")
 
-# Check if token exists before running
 if TOKEN:
     client.run(TOKEN)
 else:
-    print("ERROR: No token found! Make sure your .env file has DISCORD_TOKEN=your_token")
+    print("❌ ERROR: No token found! Check your .env file on Bot-Hosting.")
